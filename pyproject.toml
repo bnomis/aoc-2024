@@ -1,0 +1,41 @@
+[tool.ruff]
+line-length = 160
+
+
+[tool.ruff.format]
+quote-style = 'single'
+
+
+[tool.ruff.lint]
+# B: flake8-bugbear
+# E: pycodestyle
+# F: Pyflakes
+# I: isort
+# SIM: flake8-simplify
+# UP: pyupgrade
+select = [
+    'B',
+    'E',
+    'F',
+    'I',
+    'SIM',
+    "NPY201",
+    # 'UP',
+]
+# ignore
+# E501 (line length violations)
+# E722 Do not use bare `except`
+# SIM108 Use ternary operator
+ignore = [
+    'E501',
+    'E722',
+    'SIM108',
+]
+
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ['aoc']
+known-third-party = [
+    'numpy',
+]
