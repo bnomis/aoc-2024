@@ -25,7 +25,7 @@ $ pip install -r requirements.txt
 
 ## Input data
 
-Expects a directory called `data` in this directory, containing a directory for each day, containing that day's data file. For example:
+Expects a directory called `data` in this directory, containing a directory for each day, containing the day's data file. For example:
 
 - `data/day01/input.txt`
 - `data/day02/input.txt`
@@ -34,7 +34,7 @@ Expects a directory called `data` in this directory, containing a directory for 
 
 ## PYTHONPATH
 
-For Python to find the code, the `PYTHONPATH` env var needs to point to the `src` directory. Sourcing `bin/activate.sh` will set it.
+For Python to find the code, the `PYTHONPATH` env var needs to point to the `src` directory. Sourcing `bin/activate.sh` will set `PYTHONPATH`.
 
 ## Run
 
