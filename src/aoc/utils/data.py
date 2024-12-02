@@ -11,9 +11,30 @@ def readlines(path: pathlib.Path) -> list[str]:
     return lines
 
 
+def readlines_ints(path: pathlib.Path) -> list[list[int]]:
+    lines = []
+    for line in readlines(path):
+        ints = []
+        for p in line.split():
+            ip = p.strip()
+            if ip:
+                ints.append(int(ip))
+        if ints:
+            lines.append(ints)
+    return lines
+
+
 def day_input_lines(day: int) -> list[str]:
     return readlines(aoc.utils.paths.day_input_path(day))
 
 
 def day_test_lines(day: int) -> list[str]:
     return readlines(aoc.utils.paths.day_test_path(day))
+
+
+def day_input_ints(day: int) -> list[list[int]]:
+    return readlines_ints(aoc.utils.paths.day_input_path(day))
+
+
+def day_test_ints(day: int) -> list[list[int]]:
+    return readlines_ints(aoc.utils.paths.day_test_path(day))

@@ -7,20 +7,19 @@ import operator
 import aoc.utils.data
 
 
-def sorted_columns(lines: list[str]) -> tuple[list[int], list[int]]:
+def sorted_columns(lines: list[list[int]]) -> tuple[list[int], list[int]]:
     left = []
     right = []
     for line in lines:
-        parts = line.split()
-        left.append(int(parts[0]))
-        right.append(int(parts[-1]))
+        left.append(line[0])
+        right.append(line[-1])
     left_sorted = sorted(left)
     right_sorted = sorted(right)
     return left_sorted, right_sorted
 
 
 def part1() -> int:
-    left_sorted, right_sorted = sorted_columns(aoc.utils.data.day_input_lines(1))
+    left_sorted, right_sorted = sorted_columns(aoc.utils.data.day_input_ints(1))
     diffs = []
     for i in range(len(left_sorted)):
         diffs.append(abs(left_sorted[i] - right_sorted[i]))
@@ -28,7 +27,7 @@ def part1() -> int:
 
 
 def part2() -> int:
-    left_sorted, right_sorted = sorted_columns(aoc.utils.data.day_input_lines(1))
+    left_sorted, right_sorted = sorted_columns(aoc.utils.data.day_input_ints(1))
     count_cache = {}
     max_index = len(left_sorted)
     left_index = 0
