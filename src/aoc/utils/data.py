@@ -28,8 +28,8 @@ def day_input_lines(day: int) -> list[str]:
     return readlines(aoc.utils.paths.day_input_path(day))
 
 
-def day_test_lines(day: int) -> list[str]:
-    return readlines(aoc.utils.paths.day_test_path(day))
+def day_test_lines(day: int, which: int = 0) -> list[str]:
+    return readlines(aoc.utils.paths.day_test_path(day, which=which))
 
 
 def day_input_ints(day: int) -> list[list[int]]:

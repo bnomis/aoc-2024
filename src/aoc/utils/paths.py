@@ -21,5 +21,7 @@ def day_input_path(day: int) -> pathlib.Path:
     return day_data_path(day, 'input.txt')
 
 
-def day_test_path(day: int) -> pathlib.Path:
-    return day_data_path(day, 'test.txt')
+def day_test_path(day: int, which: int = 0) -> pathlib.Path:
+    if which == 0:
+        return day_data_path(day, 'test.txt')
+    return day_data_path(day, f'test{which}.txt')
