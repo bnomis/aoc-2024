@@ -6,8 +6,10 @@ import aoc.utils.paths
 
 
 def readlines(path: pathlib.Path) -> list[str]:
+    lines = []
     with path.open() as fp:
-        lines = fp.readlines()
+        for line in fp.readlines():
+            lines.append(line.strip())
     return lines
 
 
@@ -30,6 +32,20 @@ def day_input_lines(day: int) -> list[str]:
 
 def day_test_lines(day: int, which: int = 0) -> list[str]:
     return readlines(aoc.utils.paths.day_test_path(day, which=which))
+
+
+def day_input_grid(day: int) -> list[list[str]]:
+    lines = []
+    for line in readlines(aoc.utils.paths.day_input_path(day)):
+        lines.append(list(line))
+    return lines
+
+
+def day_test_grid(day: int, which: int = 0) -> list[list[str]]:
+    lines = []
+    for line in readlines(aoc.utils.paths.day_test_path(day, which=which)):
+        lines.append(list(line))
+    return lines
 
 
 def day_input_ints(day: int) -> list[list[int]]:
