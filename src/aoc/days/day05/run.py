@@ -74,17 +74,19 @@ def passes_after_rules(rules: dict, page: int, afters: list[int]) -> bool:
 
 
 def passes_rules(rules: dict, updates: list[int]) -> bool:
-    # print(f'{updates}')
     updates_length = len(updates)
     for i in range(updates_length):
         page = updates[i]
         before = updates[0:i]
         after = updates[i+1:updates_length]
         passes_before = passes_before_rules(rules, page, before)
-        passes_after = passes_after_rules(rules, page, after)
-        # print(f'{before} {page} {after} {passes_before} {passes_after}')
-        if not (passes_before and passes_after):
+        if not passes_before:
             return False
+
+        passes_after = passes_after_rules(rules, page, after)
+        if not passes_after:
+            return False
+
     return True
 
 
@@ -111,7 +113,6 @@ def fix_an_issue(rules: dict, updates: list[int]) -> list[int]:
         befores = updates[0:i]
         for before_index, b in enumerate(befores):
             if b in rules and page in rules[b]['after']:
-                # print(f'before: swap {page} {b}')
                 updates[i] = b
                 updates[before_index] = page
                 return updates
@@ -119,10 +120,10 @@ def fix_an_issue(rules: dict, updates: list[int]) -> list[int]:
         afters = updates[i + 1 : updates_length]
         for after_index, a in enumerate(afters):
             if a in rules and page in rules[a]['before']:
-                # print(f'after: swap {page} {a}')
                 updates[i] = a
                 updates[i + 1 + after_index] = page
                 return updates
+
     return updates
 
 
@@ -131,7 +132,6 @@ def fix_update(rules: dict, updates: list[int]) -> list[int]:
         return updates
 
     fixed = fix_an_issue(rules, updates)
-    # print(f'{updates} -> {fixed}')
     return fix_update(rules, fixed)
 
 
