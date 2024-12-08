@@ -27,11 +27,14 @@ class Equation:
         self.target = target
         self.numbers = numbers
         self.operators = operators
+        self.ops = []
+        for c in operators:
+            self.ops.append(operator_map[c])
 
     def __str__(self) -> str:
         return f'{self.target}: {self.numbers}'
 
-    def makes(self, ops: list[str]) -> tuple[bool, list[str]]:
+    def makes_comb(self, ops: list[str]) -> tuple[bool, list[str]]:
         total = self.numbers[0]
         op_cache = []
         for i, o in enumerate(ops):
@@ -48,7 +51,7 @@ class Equation:
     def all_mul(self) -> int:
         return functools.reduce(operator.mul, self.numbers, 1)
 
-    def truthy(self) -> bool:
+    def truthy_comb(self) -> bool:
         num_nums = len(self.numbers)
         num_combs = num_nums - 1
 
@@ -83,13 +86,37 @@ class Equation:
                 if bad_op:
                     continue
 
-                good, ops = self.makes(p)
+                good, ops = self.makes_comb(p)
                 if good:
                     return True
                 tried.append(p)
                 if len(ops) > 0:
                     bad_ops.append(ops)
                 attempt += 1
+        return False
+
+    def truthy(self) -> bool:
+        # https://topaz.github.io/paste/#XQAAAQBgBQAAAAAAAAAzHIoib6qOhkKVB6+O3fm4OMHyeMAxpj3pnh6q9HZdml22zq92lTaCI7ki/Xux2v2vlBQsI5F0KacFpkIDsL+QmszzQV7aqkWXbZFOVE+EJ2DhIed7ZPO1Z5USfqlVt0eIwCm42m+1d21cAzMyh0q0Zk+lQT3aC2m9fRbR3QNERoDKWYHw6tIIawpcYQkatJYof9VuFBzAC8fQYiu5enK2oM3FqUCsX7rmG7MDuydOgf8Va4Umox+a0tyUEGu5l4OW4ucyEs343E4eZ0NMQ+CaQahhgMQlOk6l183CfDYbnBv0tbMdkY2PiwzBoAXXw9hGpGMImgn+Ma/NeM3xds8vN+c41JrwmKOyZ4wq2LROeu3nisZrW9KlBMy3RVtP5wtkUNL2KAHAoytBZOWw93/W8eucTOUcW28qF+/MSAHrb0M10Gw2cY5syUdMywQ564820PcZQUip+BGCj+Gp0PoQxw0UtYxmfaHmCnhHScDfk6ukcinV+f84PWBq0peFTbc5UKpBzDhQJxUK+hrSwGBcMpkLVxaC9oc5j+SAfsWnkqR3QU7KuTF9dDTOCfvf1rByJ+84zHOF4wWyfM7dyGzgK7T+OhqpW+QlfOWO5G+EucMP7qWv0hUKVn9HPjwGRELjxCjexL+j+mvgwdjIDjm10u0XwP3+J+gM4kHuMRugDapog5HBLXTUICOas15nOvucImdrXuYmoNBA2H5UNF3CQfNkz98E0XCCIkmGSNC+K7uhWc5hbVjVOKywGFP/5zLASA==
+        accumulator = [self.numbers[0]]
+        # print(accumulator)
+
+        # this runs along the numbers
+        # accumulating the results
+        for num in self.numbers[1:-1]:
+            accumulator = [
+                result
+                for partial in accumulator
+                for op in self.ops
+                if (result := op(partial, num)) <= self.target
+            ]
+            # print(accumulator)
+
+        # last number
+        num = self.numbers[-1]
+        for partial in accumulator:
+            for op in self.ops:
+                if op(partial, num) == self.target:
+                    return True
         return False
 
 
@@ -106,11 +133,10 @@ def parse_lines(lines: list[str], operators: str = '*+') -> list[Equation]:
 
 
 def part1() -> int:
-    return 0
     lines = aoc.utils.data.day_input_lines(7)
     total = 0
     for e in parse_lines(lines):
-        print(e)
+        # print(e)
         if e.truthy():
             total += e.target
     return total
@@ -120,7 +146,7 @@ def part2() -> int:
     lines = aoc.utils.data.day_input_lines(7)
     total = 0
     for e in parse_lines(lines, operators='*+|'):
-        print(e)
+        # print(e)
         if e.truthy():
             total += e.target
     return total
