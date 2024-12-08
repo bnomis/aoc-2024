@@ -41,3 +41,9 @@ For Python to find the code, the `PYTHONPATH` env var needs to point to the `src
 Run all the days with `bin/run.sh`
 
 Run an individual day with `./run.py` in the day's directory.
+
+## What's slow?
+
+Day 06/part 02: finds graph cycles with recursive Depth First Traversal. Also had to increase the recursion limit.
+
+Day 07: combinations + permutations
