@@ -46,4 +46,6 @@ Run an individual day with `./run.py` in the day's directory.
 
 Day 06/part 02: finds graph cycles with recursive Depth First Traversal. Also had to increase the recursion limit.
 
-Day 07: combinations + permutations
+Day 07: combinations + permutations are too slow, rewrote to use a simpler method
+
+Day 09: is a little slow
