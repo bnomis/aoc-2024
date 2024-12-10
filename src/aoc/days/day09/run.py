@@ -13,6 +13,7 @@ class Disk:
         self.state = state
         self.map = []
         self.spaces = []
+        self.files = []
         self.state_to_map(state)
 
     def state_to_map(self, state: str) -> list[str]:
@@ -89,6 +90,190 @@ class Disk:
         return total
 
 
+class Disk2:
+    def __init__(self, state: str) -> None:
+        self.state = state
+        self.files = {}
+        self.spaces = {}
+        self.map_state(state)
+
+    def map_state(self, state: str) -> None:
+        files = {}
+        spaces = {}
+        start = 0
+        for index, c in enumerate(state):
+            file = is_even(index)
+            file_id = int(index / 2)
+            length = int(c)
+            if length == 0:
+                continue
+
+            if file:
+                files[file_id] = {
+                    'start': start,
+                    'length': length
+                }
+            else:
+                spaces[file_id] = {
+                    'start': start,
+                    'length': length,
+                }
+            start += length
+
+        self.files = files
+        self.spaces = spaces
+        # self.print()
+
+    def print(self) -> None:
+        self.print_files()
+        self.print_spaces()
+        self.print_map()
+
+    def print_files(self) -> None:
+        print('files')
+        for fid in sorted(self.files.keys()):
+            f = self.files[fid]
+            print(f'  {fid}: {f["start"]} {f["length"]}')
+
+    def print_spaces(self) -> None:
+        print('spaces')
+        for fid in sorted(self.spaces.keys()):
+            f = self.spaces[fid]
+            print(f'  {fid}: {f["start"]} {f["length"]}')
+
+    def print_map(self) -> None:
+        mapper = {}
+        for k, v in self.files.items():
+            index = v['start']
+            for i in range(v['length']):
+                mapper[index + i] = str(k)
+        for _, v in self.spaces.items():
+            index = v['start']
+            for i in range(v['length']):
+                mapper[index + i] = '.'
+        out = []
+        for k in sorted(mapper.keys()):
+            out.append(mapper[k])
+        print(''.join(out))
+
+    def print_gaps(self, gaps) -> None:
+        print('gaps')
+        for k in sorted(gaps.keys()):
+            print(f'  {k}: {gaps[k]}')
+
+    def spaces_to_gaps(self, spaces) -> dict:
+        gaps = {}
+        space_ids = sorted(spaces.keys())
+        for sid in space_ids:
+            length = spaces[sid]['length']
+            if length not in gaps:
+                gaps[length] = []
+            gaps[length].append(sid)
+        return gaps
+
+    def coalesce_spaces(self, spaces):
+        new_spaces = {}
+        new_space_id = 0
+        sps = sorted(spaces.values(), key=lambda x: x['start'])
+        spaces = {}
+        for index, s in enumerate(sps):
+            spaces[index] = s
+        space_ids = sorted(spaces.keys())
+        sid_index = 0
+        sid_length = len(space_ids)
+        while sid_index < sid_length:
+            sid = space_ids[sid_index]
+            space_start = spaces[sid]['start']
+            space_length = spaces[sid]['length']
+            next_sid_index = sid_index + 1
+            while next_sid_index < sid_length:
+                next_sid = space_ids[next_sid_index]
+                if spaces[next_sid]['start'] != space_start + space_length:
+                    break
+
+                space_length += spaces[next_sid]['length']
+                next_sid_index += 1
+
+            sid_index = next_sid_index
+            new_spaces[new_space_id] = {
+                'start': space_start,
+                'length': space_length,
+            }
+            new_space_id += 1
+
+        return new_spaces
+
+    def defrag(self):
+        # print('-- defrag --')
+        file_ids = sorted(self.files.keys(), reverse=True)
+        for fid in file_ids:
+            # print(f'before file: {fid}')
+            self.spaces = self.coalesce_spaces(self.spaces)
+            # self.print()
+
+            gaps = self.spaces_to_gaps(self.spaces)
+            # self.print_gaps(gaps)
+
+            # no gaps left
+            if len(gaps) == 0:
+                break
+
+            file_start = self.files[fid]['start']
+            file_length = self.files[fid]['length']
+            gap_lengths = sorted(gaps.keys())
+
+            # no gap big enough for file
+            if gap_lengths[-1] < file_length:
+                # print('no space')
+                continue
+
+            # find first gap big enough
+            found = False
+            space = 0
+            for space in sorted(self.spaces.keys()):
+                if self.spaces[space]['length'] >= file_length:
+                    found = True
+                    break
+
+            if not found:
+                continue
+
+            space_start = self.spaces[space]['start']
+
+            # dont move right
+            if space_start > file_start:
+                continue
+
+            # move file
+            self.files[fid]['start'] = space_start
+            # use up space
+            remaining = self.spaces[space]['length'] - file_length
+            if remaining == 0:
+                self.spaces.pop(space)
+            else:
+                self.spaces[space]['start'] += file_length
+                self.spaces[space]['length'] = remaining
+            last_space_id = sorted(self.spaces.keys(), reverse=True)[0]
+            # space left by removing file
+            self.spaces[last_space_id + 1] = {
+                'start': file_start,
+                'length': file_length,
+            }
+            # print(f'after file: {fid}')
+            # self.print()
+        # self.print()
+
+    def checksum(self) -> int:
+        total = 0
+        for fid in sorted(self.files.keys()):
+            if fid == 0:
+                continue
+            start = self.files[fid]['start']
+            for i in range(self.files[fid]['length']):
+                total += (fid * (start + i))
+        return total
+
+
 def part1() -> int:
     lines = aoc.utils.data.day_input_lines(9)
     disk = Disk(lines[0])
@@ -97,7 +282,10 @@ def part1() -> int:
 
 
 def part2() -> int:
-    return 0
+    lines = aoc.utils.data.day_input_lines(9)
+    disk = Disk2(lines[0])
+    disk.defrag()
+    return disk.checksum()
 
 
 def main() -> None:
