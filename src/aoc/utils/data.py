@@ -54,3 +54,23 @@ def day_input_ints(day: int) -> list[list[int]]:
 
 def day_test_ints(day: int) -> list[list[int]]:
     return readlines_ints(aoc.utils.paths.day_test_path(day))
+
+
+def day_input_grid_ints(day: int) -> list[list[int]]:
+    lines = []
+    for line in readlines(aoc.utils.paths.day_input_path(day)):
+        il = []
+        for c in list(line):
+            il.append(int(c))
+        lines.append(il)
+    return lines
+
+
+def day_test_grid_ints(day: int, which: int = 0) -> list[list[int]]:
+    lines = []
+    for line in readlines(aoc.utils.paths.day_test_path(day, which=which)):
+        il = []
+        for c in list(line):
+            il.append(int(c))
+        lines.append(il)
+    return lines
