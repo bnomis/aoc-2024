@@ -49,3 +49,5 @@ Day 06/part 02: finds graph cycles with recursive Depth First Traversal. Also ha
 Day 07: combinations + permutations are too slow, rewrote to use a simpler method
 
 Day 09: is a little slow
+
+Day 12: is a little slow
