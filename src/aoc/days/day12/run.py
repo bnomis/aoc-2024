@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import aoc.types
 import aoc.utils.data
 import aoc.utils.grid
+import aoc.utils.types
 
 """
 Corners == Sides
@@ -65,7 +65,7 @@ neighbours -> corners
 """
 
 
-def opposites(points: list[aoc.types.Point]) -> bool:
+def opposites(points: list[aoc.utils.types.Point]) -> bool:
     a = points[0]
     b = points[1]
     return a.x == b.x or a.y == b.y
@@ -73,7 +73,7 @@ def opposites(points: list[aoc.types.Point]) -> bool:
 
 def gap_is(
     grid: list[list[str]],
-    points: list[aoc.types.Point],
+    points: list[aoc.utils.types.Point],
     plant: str,
 ) -> bool:
     min_x = max_x = points[0].x
@@ -90,14 +90,14 @@ def gap_is(
     gap = None
     for x in [min_x, max_x]:
         for y in [min_y, max_y]:
-            p = aoc.types.Point(x, y)
+            p = aoc.utils.types.Point(x, y)
             if p not in points:
                 gap = p
                 break
     return aoc.utils.grid.char_at_point(grid, gap) == plant
 
 
-def find_gaps(points: list[aoc.types.Point]) -> list[aoc.types.Point]:
+def find_gaps(points: list[aoc.utils.types.Point]) -> list[aoc.utils.types.Point]:
     min_x = max_x = points[0].x
     min_y = max_y = points[0].y
     for p in points[1:]:
@@ -112,7 +112,7 @@ def find_gaps(points: list[aoc.types.Point]) -> list[aoc.types.Point]:
     gaps = []
     for x in range(min_x, max_x + 1):
         for y in range(min_y, max_y + 1):
-            p = aoc.types.Point(x, y)
+            p = aoc.utils.types.Point(x, y)
             if p not in points:
                 gaps.append(p)
     return gaps
@@ -120,7 +120,7 @@ def find_gaps(points: list[aoc.types.Point]) -> list[aoc.types.Point]:
 
 def count_of_plants_in_gaps(
     grid: list[list[str]],
-    points: list[aoc.types.Point],
+    points: list[aoc.utils.types.Point],
     plant: str,
 ) -> int:
     gaps = find_gaps(points)
@@ -239,7 +239,7 @@ def all_corners(four_compass_neighbours, compass_neighbours) -> int:
 
 
 class Region:
-    def __init__(self, plant: str, points: list[aoc.types.Point]) -> None:
+    def __init__(self, plant: str, points: list[aoc.utils.types.Point]) -> None:
         self.plant = plant
         self.points = points
         self._perimeter_path = []
@@ -254,7 +254,7 @@ class Region:
     def area(self) -> int:
         return len(self.points)
 
-    def perimeter_path(self, grid: list[list[str]]) -> list[aoc.types.Point]:
+    def perimeter_path(self, grid: list[list[str]]) -> list[aoc.utils.types.Point]:
         if not self._perimeter_path:
             perimeter = []
             for p in self.points:
@@ -278,7 +278,7 @@ class Region:
             length += edges
         return length
 
-    def border_cells(self, grid: list[list[str]]) -> list[aoc.types.Point]:
+    def border_cells(self, grid: list[list[str]]) -> list[aoc.utils.types.Point]:
         if not self._border_cells:
             border = []
             for p in self.points:
@@ -348,9 +348,9 @@ class Region:
 def region_points(
     grid: list[list[str]],
     plant: str,
-    points: list[aoc.types.Point],
-    visited: list[aoc.types.Point],
-) -> tuple[list[aoc.types.Point], list[aoc.types.Point]]:
+    points: list[aoc.utils.types.Point],
+    visited: list[aoc.utils.types.Point],
+) -> tuple[list[aoc.utils.types.Point], list[aoc.utils.types.Point]]:
     current = points[-1]
     unvisited_neighbours = []
     for n in aoc.utils.grid.neighbours(grid, current):
@@ -368,7 +368,7 @@ def region_points(
     return points, visited
 
 
-def find_region(grid: list[list[str]], point: aoc.types.Point, visited: list[aoc.types.Point]) -> tuple[Region, list[aoc.types.Point]]:
+def find_region(grid: list[list[str]], point: aoc.utils.types.Point, visited: list[aoc.utils.types.Point]) -> tuple[Region, list[aoc.utils.types.Point]]:
     plant = aoc.utils.grid.char_at_point(grid, point)
     visited.append(point)
     points = [point]
@@ -382,7 +382,7 @@ def grid_to_regions(grid: list[list[str]]) -> list[Region]:
     visited = []
     for row_index, row in enumerate(grid):
         for column_index, _ in enumerate(row):
-            p = aoc.types.Point(column_index, row_index)
+            p = aoc.utils.types.Point(column_index, row_index)
             if p in visited:
                 continue
             region, visited = find_region(grid, p, visited)

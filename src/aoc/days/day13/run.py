@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import random
 
-import aoc.types
 import aoc.utils.data
 import aoc.utils.grid
+import aoc.utils.types
 
 """
 px = A.x * a + B.x * b
@@ -48,10 +48,10 @@ max_button_presses = 100
 class Button:
     def __init__(self, id: str, x: int, y: int) -> None:
         self.id = id
-        self.delta = aoc.types.Point(x, y)
+        self.delta = aoc.utils.types.Point(x, y)
 
-    def add_to_point(self, point: aoc.types.Point) -> aoc.types.Point:
-        return aoc.types.Point(point.x + self.delta.x, point.y + self.delta.y)
+    def add_to_point(self, point: aoc.utils.types.Point) -> aoc.utils.types.Point:
+        return aoc.utils.types.Point(point.x + self.delta.x, point.y + self.delta.y)
 
 
 def path_to_counts(path: list[str]) -> dict:
@@ -80,9 +80,9 @@ def path_has_max_presses(path: list[str]) -> bool:
 
 
 def prize_paths(
-    prize: aoc.types.Point,
+    prize: aoc.utils.types.Point,
     buttons: list[Button],
-    position: aoc.types.Point,
+    position: aoc.utils.types.Point,
     path: list[str],
     found: list[list[str]],
 ) -> list[list[str]]:
@@ -117,22 +117,22 @@ def line_to_button(line: str) -> Button:
     return Button(id, x, y)
 
 
-def line_to_prize(line: str) -> aoc.types.Point:
+def line_to_prize(line: str) -> aoc.utils.types.Point:
     _, pos = line.split(':')
     xs, ys = pos.strip().split(', ')
     x = int(xs[2:])
     y = int(ys[2:])
-    return aoc.types.Point(x, y)
+    return aoc.utils.types.Point(x, y)
 
 
-def lines_to_machine(lines: list[str]) -> tuple[list[Button], aoc.types.Point]:
+def lines_to_machine(lines: list[str]) -> tuple[list[Button], aoc.utils.types.Point]:
     a = line_to_button(lines[0])
     b = line_to_button(lines[1])
     prize = line_to_prize(lines[2])
     return [a, b], prize
 
 
-def lines_to_machines(lines: list[str]) -> list[tuple[list[Button], aoc.types.Point]]:
+def lines_to_machines(lines: list[str]) -> list[tuple[list[Button], aoc.utils.types.Point]]:
     length = len(lines)
     machines = []
     line_index = 0
@@ -143,7 +143,7 @@ def lines_to_machines(lines: list[str]) -> list[tuple[list[Button], aoc.types.Po
     return machines
 
 
-def count_presses(buttons: list[Button], prize: aoc.types.Point) -> list[list[int]]:
+def count_presses(buttons: list[Button], prize: aoc.utils.types.Point) -> list[list[int]]:
     counts = []
     a = buttons[0].delta
     b = buttons[1].delta
@@ -161,7 +161,7 @@ def count_presses(buttons: list[Button], prize: aoc.types.Point) -> list[list[in
     return counts
 
 
-def count_algebra(buttons: list[Button], prize: aoc.types.Point) -> list[int] | None:
+def count_algebra(buttons: list[Button], prize: aoc.utils.types.Point) -> list[int] | None:
     A = buttons[0].delta
     B = buttons[1].delta
     a = (prize.x * B.y - prize.y * B.x) / (A.x * B.y - A.y * B.x)
@@ -171,8 +171,8 @@ def count_algebra(buttons: list[Button], prize: aoc.types.Point) -> list[int] | 
     return None
 
 
-def machine_to_cheapest_cost_recurse(buttons: list[Button], prize: aoc.types.Point) -> int:
-    start = aoc.types.Point(0, 0)
+def machine_to_cheapest_cost_recurse(buttons: list[Button], prize: aoc.utils.types.Point) -> int:
+    start = aoc.utils.types.Point(0, 0)
     found = prize_paths(prize, buttons, start, [], [])
     if not found:
         return 0
@@ -182,7 +182,7 @@ def machine_to_cheapest_cost_recurse(buttons: list[Button], prize: aoc.types.Poi
     return sorted(costs)[0]
 
 
-def machine_to_cheapest_cost_presses(buttons: list[Button], prize: aoc.types.Point) -> int:
+def machine_to_cheapest_cost_presses(buttons: list[Button], prize: aoc.utils.types.Point) -> int:
     found = count_presses(buttons, prize)
     if not found:
         return 0
@@ -192,7 +192,7 @@ def machine_to_cheapest_cost_presses(buttons: list[Button], prize: aoc.types.Poi
     return sorted(costs)[0]
 
 
-def machine_to_cheapest_cost_algebra(buttons: list[Button], prize: aoc.types.Point) -> int:
+def machine_to_cheapest_cost_algebra(buttons: list[Button], prize: aoc.utils.types.Point) -> int:
     found = count_algebra(buttons, prize)
     if not found:
         return 0
@@ -227,7 +227,7 @@ def part2() -> int:
     lines = aoc.utils.data.day_input_lines(13)
     costs = 0
     for buttons, prize in lines_to_machines(lines):
-        prize = aoc.types.Point(prize.x + 10000000000000, prize.y + 10000000000000)
+        prize = aoc.utils.types.Point(prize.x + 10000000000000, prize.y + 10000000000000)
         costs += machine_to_cheapest_cost_algebra(buttons, prize)
     return costs
 

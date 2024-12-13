@@ -105,7 +105,6 @@ def part2() -> int:
     stones = {}
     for s in stone_list:
         stones[s] = 1
-    print(stones)
     for _ in range(75):
         stones = blink(stones)
     return sum(stones.values())
