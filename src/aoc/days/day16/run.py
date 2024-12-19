@@ -105,11 +105,26 @@ class Node:
     def __hash__(self) -> int:
         return hash((self.position.x, self.position.y, self.direction))
 
+    def __str__(self) -> str:
+        return f'{self.position.x,self.position.y} {self.direction} {self.cost}'
+
+    def pos(self) -> tuple:
+        return (self.position.x, self.position.y, self.direction)
+
 
 class NodePath(Node):
     def __init__(self, position: aoc.utils.types.Position, direction: str, cost: int, path: list[aoc.utils.types.Position]) -> None:
         super().__init__(position, direction, cost)
         self.path = path
+
+    def __str__(self) -> str:
+        return f'{self.position.x,self.position.y} {self.direction} {self.cost} {self.path}'
+
+    def __hash__(self) -> int:
+        path = []
+        for p in self.path:
+            path.append((p.x, p.y))
+        return hash((self.position.x, self.position.y, self.direction, tuple(path)))
 
 
 class Grid:
@@ -449,21 +464,20 @@ class Grid:
         }
         # priority queue
         pq = [Node(start, 'E', 0)]
-        all_paths = []
         while pq:
             current_node = heapq.heappop(pq)
             current = current_node.position
 
             # found
             if current == end:
-                print('found')
-                all_paths.append(self.backtrack(paths, end))
-                continue
                 return self.backtrack(paths, end)
 
             current_cost = current_node.cost
-            for nv in self.neighbour_vectors(current):
+            current_direction = current_node.direction
+            for nv in self.neighbour_vectors_directioned(current_direction):
                 n = current + nv
+                if self.is_wall(n):
+                    continue
 
                 new_direction = vector_to_direction[nv]
                 new_cost = current_cost + self.cost_to_move(current_node, end, new_direction)
@@ -480,7 +494,7 @@ class Grid:
                     heapq.heappush(pq, Node(n, new_direction, new_cost))
 
         # not found
-        return all_paths
+        return []
 
     def backtrack(
         self,
@@ -529,9 +543,11 @@ class Grid:
             current_direction = current_node.direction
             for nv in self.neighbour_vectors_directioned(current_direction):
                 n = current + nv
+                if self.is_wall(n):
+                    continue
+
                 new_direction = vector_to_direction[nv]
-                # new_cost = cost + self.cost_to_move(current_node, end, new_direction)
-                new_cost = cost + 1
+                new_cost = cost + self.cost_to_move(current_node, end, new_direction)
 
                 if new_cost <= path_costs[n]:
                     path_costs[n] = new_cost
@@ -545,29 +561,45 @@ class Grid:
     ):
         # https://www.reddit.com/r/adventofcode/comments/1hfboft/comment/m2e4uhy/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
         current_node = NodePath(start, 'E', 0, [start])
-        work = [current_node]
-        best_costs = {current_node: 0}
+        work = []
+        heapq.heappush(work, current_node)
+        # costs for position with direction
+        best_costs = {current_node.pos(): 0}
         best_end_cost = 0
         best_seats = set()
 
         while work:
             current_node = heapq.heappop(work)
+            # print(f'current {current_node}')
             current_position = current_node.position
             current_direction = current_node.direction
+            # print(f'current {current_position} {current_direction}')
+
             current_path = current_node.path
             current_cost = current_node.cost
             if current_position == end:
                 best_seats |= {*current_path}
                 best_end_cost = current_cost
             elif best_end_cost == 0 or current_cost < best_end_cost:
-                for nv in self.neighbour_vectors_directioned(current_direction):
-                    new_position = current_position + nv
-                    new_direction = vector_to_direction[nv]
-                    new_cost = current_cost + self.cost_to_move(current_node, end, new_direction)
-                    new_node = NodePath(new_position, new_direction, new_cost, current_path + [new_position])
-                    if new_node not in best_costs or best_costs[new_node] >= new_cost:
-                        best_costs[new_node] = new_cost
-                        heapq.heappush(work, new_node)
+                nodes = []
+                # forward
+                forward_vector = direction_to_vector[current_direction]
+                new_position = current_position + forward_vector
+                if self.is_space(new_position):
+                    nodes.append(NodePath(new_position, current_direction, current_cost + 1, current_path[:] + [new_position]))
+                # left
+                new_direction = direction_rotate_left(current_direction)
+                nodes.append(NodePath(current_position, new_direction, current_cost + 1000, current_path[:] + [current_position]))
+                # right
+                new_direction = direction_rotate_right(current_direction)
+                nodes.append(NodePath(current_position, new_direction, current_cost + 1000, current_path[:] + [current_position]))
+                for n in nodes:
+                    # print(f'current {current_position} {current_direction} -> {n.position} {n.direction}')
+                    pos = n.pos()
+                    cost = n.cost
+                    if pos not in best_costs or best_costs[pos] >= cost:
+                        best_costs[pos] = cost
+                        heapq.heappush(work, n)
 
         return best_end_cost, best_seats
 
@@ -593,9 +625,10 @@ class Grid:
             elif not best_end_cost or cost < best_end_cost:
                 for ncost, nx, ny, ndx, ndy in (
                     (cost + 1, x + dx, y + dy, dx, dy),  # straight
-                    (cost + 1000, x, y, dy, -dx),  # left
-                    (cost + 1000, x, y, -dy, dx),  # right
+                    (cost + 1000, x, y, dy, -dx),  # left rotate not move
+                    (cost + 1000, x, y, -dy, dx),  # right rotate not move
                 ):
+                    print(f'{x},{y} -> {nx},{ny} {dx},{dy} {path}')
                     pos = nx, ny, ndx, ndy
                     if self.grid[ny][nx] != '#' and best_costs.get(pos, ncost + 1) >= ncost:
                         best_costs[pos] = ncost
@@ -610,8 +643,26 @@ class Grid:
         return 0
 
     def run2(self) -> int:
-        _, best_seats = self.dijkstra4(self.start, self.end)
+        _, best_seats = self.dijkstra3(self.start, self.end)
         return len(best_seats)
+
+    def run2_dijkstra(self) -> int:
+        all_paths = self.dijkstra(self.start, self.end)
+        tiles = set()
+        for p in all_paths:
+            for t in p:
+                tiles.add(t)
+        self.print_grid_with_tiles(tiles)
+        return len(tiles)
+
+    def run2_all_paths(self) -> int:
+        all_shortest_paths, min_cost = self.dijkstra_all_paths(self.start, self.end)
+        tiles = set()
+        for p in all_shortest_paths:
+            for t in p:
+                tiles.add(t)
+        self.print_grid_with_tiles(tiles)
+        return len(tiles)
 
 
 def lines_to_grid(lines: list[str]) -> Grid:
