@@ -459,47 +459,65 @@ class Grid:
         end: aoc.utils.types.Position,
     ) -> list[list[aoc.utils.types.Position]]:
         # this is a modified dijkstra to return all the best path costs
-        paths = {
-            start: [(0, None)],
-        }
+
+        start_node = Node(start, 'E', 0)
         # priority queue
-        pq = [Node(start, 'E', 0)]
+        pq = [start_node]
+        paths = {
+            start_node.pos(): [(0, None)],
+        }
+        # can arrive at the end in any orientation
+        ends = []
+        for c in ['N', 'S', 'E', 'W']:
+            n = Node(end, c, 0)
+            ends.append(n.pos())
+
         while pq:
             current_node = heapq.heappop(pq)
-            current = current_node.position
-
+            current_position = current_node.position
+            current_pos = current_node.pos()
             # found
-            if current == end:
-                return self.backtrack(paths, end)
+            if current_pos in ends:
+                return self.backtrack(paths, current_pos)
 
             current_cost = current_node.cost
             current_direction = current_node.direction
-            for nv in self.neighbour_vectors_directioned(current_direction):
-                n = current + nv
-                if self.is_wall(n):
-                    continue
 
-                new_direction = vector_to_direction[nv]
-                new_cost = current_cost + self.cost_to_move(current_node, end, new_direction)
+            # nodes from here
+            nodes = []
+            # forward
+            forward_vector = direction_to_vector[current_direction]
+            new_position = current_position + forward_vector
+            if self.is_space(new_position):
+                nodes.append(Node(new_position, current_direction, current_cost + 1))
+            # left
+            new_direction = direction_rotate_left(current_direction)
+            nodes.append(Node(current_position, new_direction, current_cost + 1000))
+            # right
+            new_direction = direction_rotate_right(current_direction)
+            nodes.append(Node(current_position, new_direction, current_cost + 1000))
 
+            for n in nodes:
+                cost = n.cost
+                pos = n.pos()
                 # new node or cheaper that what we currently have
-                if n not in paths or new_cost <= min(p[0] for p in paths[n]):
-                    if n not in paths:
-                        paths[n] = []
+                if pos not in paths or cost <= min(p[0] for p in paths[pos]):
+                    if pos not in paths:
+                        paths[pos] = []
                     else:
                         # filter existing paths which are the same cost
-                        paths[n] = [p for p in paths[n] if p[0] == new_cost]
+                        paths[pos] = [p for p in paths[pos] if p[0] == cost]
                     # add the new path
-                    paths[n].append((new_cost, current))
-                    heapq.heappush(pq, Node(n, new_direction, new_cost))
+                    paths[pos].append((cost, current_node.pos()))
+                    heapq.heappush(pq, n)
 
         # not found
         return []
 
     def backtrack(
         self,
-        paths: dict[aoc.utils.types.Position, list],
-        end: aoc.utils.types.Position,
+        paths: dict[tuple, list],
+        end: tuple,
     ) -> list[list[aoc.utils.types.Position]]:
         def reconstruct_paths(current, path) -> list[list[aoc.utils.types.Position]]:
             # None if the start
@@ -692,6 +710,7 @@ def part1_recurse() -> int:
 
 
 def part1() -> int:
+    # return 0
     lines = aoc.utils.data.day_input_lines(16)
     # lines = aoc.utils.data.day_test_lines(16, which=2)
 
@@ -701,7 +720,7 @@ def part1() -> int:
 
 def part2() -> int:
     lines = aoc.utils.data.day_input_lines(16)
-    # lines = aoc.utils.data.day_test_lines(16, which=2)
+    # lines = aoc.utils.data.day_test_lines(16, which=0)
 
     grid = lines_to_grid(lines)
     return grid.run2()
