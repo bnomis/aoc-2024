@@ -31,3 +31,9 @@ class Position:
         self.x += value.x
         self.y += value.y
         return self
+
+    def pos(self) -> tuple:
+        return (self.x, self.y)
+
+    def __lt__(self, other: Self) -> bool:
+        return self.x < other.x and self.y < other.y

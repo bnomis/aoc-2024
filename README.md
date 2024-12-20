@@ -51,3 +51,5 @@ Day 07: combinations + permutations are too slow, rewrote to use a simpler metho
 Day 09: is a little slow
 
 Day 12: is a little slow
+
+Day 18: is a little slow
