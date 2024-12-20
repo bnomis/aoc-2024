@@ -160,6 +160,24 @@ def parse_input(lines: list[str]) -> dict:
     return out
 
 
+def part2_slow() -> int:
+    # return 0
+    # lines = aoc.utils.data.day_test_lines(17, which=2)
+    lines = aoc.utils.data.day_input_lines(17)
+    parsed_input = parse_input(lines)
+    target = parsed_input['program']
+    found = False
+    a = 0
+    while not found:
+        parsed_input['registers']['A'] = a
+        computer = Computer(parsed_input)
+        if computer.target(target):
+            found = True
+            break
+        a += 1
+    return a
+
+
 # work from right to left finding the 3 bits in A which match the target
 def find_digits(input: dict, astart: int, index: int, possible: set | None = None) -> int:
     if possible is None:
@@ -190,24 +208,6 @@ def part1() -> str:
     computer = Computer(parsed_input)
     computer.run()
     return computer.get_output()
-
-
-def part2_slow() -> int:
-    # return 0
-    # lines = aoc.utils.data.day_test_lines(17, which=2)
-    lines = aoc.utils.data.day_input_lines(17)
-    parsed_input = parse_input(lines)
-    target = parsed_input['program']
-    found = False
-    a = 0
-    while not found:
-        parsed_input['registers']['A'] = a
-        computer = Computer(parsed_input)
-        if computer.target(target):
-            found = True
-            break
-        a += 1
-    return a
 
 
 def part2() -> int:
