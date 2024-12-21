@@ -20,7 +20,11 @@ def main() -> None:
         end = today.day
 
     for day in range(1, end + 1):
-        run_day(day)
+        try:
+            run_day(day)
+        except:
+            print(f'Failed on day {day}')
+            break
 
 
 if __name__ == '__main__':
