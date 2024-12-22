@@ -12,6 +12,9 @@ class Position:
     def __str__(self) -> str:
         return f'{self.x},{self.y}'
 
+    def __lt__(self, other: Self) -> bool:
+        return self.x < other.x and self.y < other.y
+
     def __eq__(self, value: Self) -> bool:
         return self.x == value.x and self.y == value.y
 
@@ -20,6 +23,9 @@ class Position:
 
     def __add__(self, value: Self) -> Self:
         return Position(self.x + value.x, self.y + value.y)
+
+    def __sub__(self, value: Self) -> Self:
+        return Position(self.x - value.x, self.y - value.y)
 
     def __mul__(self, value: int) -> Self:
         return Position(self.x * value, self.y * value)
@@ -35,5 +41,5 @@ class Position:
     def pos(self) -> tuple:
         return (self.x, self.y)
 
-    def __lt__(self, other: Self) -> bool:
-        return self.x < other.x and self.y < other.y
+    def distance(self, value: Self) -> int:
+        return abs(self.x - value.x) + abs(self.y - value.y)
