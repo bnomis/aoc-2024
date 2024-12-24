@@ -34,6 +34,10 @@ def day_test_lines(day: int, which: int = 0) -> list[str]:
     return readlines(aoc.utils.paths.day_test_path(day, which=which))
 
 
+def day_file_lines(day: int, filename: str) -> list[str]:
+    return readlines(aoc.utils.paths.day_data_path(day, filename))
+
+
 def day_input_grid(day: int) -> list[list[str]]:
     lines = []
     for line in readlines(aoc.utils.paths.day_input_path(day)):
